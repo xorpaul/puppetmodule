@@ -81,7 +81,7 @@ class puppet::agent(
   $http_proxy_host        = undef,
   $http_proxy_port        = undef,
   $cron_hour              = '*',
-  $cron_minute            = '*/30',
+  $cron_minute            = undef, 
 ) inherits puppet::params {
 
   if ! defined(User[$::puppet::params::puppet_user]) {
@@ -139,11 +139,21 @@ class puppet::agent(
       $service_ensure = 'stopped'
       $service_enable = false
 
+      # Default to every 30 minutes - random around the clock
+      if $cron_minute == undef {
+        $time1  =  fqdn_rand(30)
+        $time2  =  $time1 + 30
+        $minute = [ $time1, $time2 ]
+      }
+      else {
+        $minute = $cron_minute
+      }
+
       cron { 'puppet-client':
         command => $puppet_run_command,
         user    => 'root',
         hour    => $cron_hour,
-        minute  => $cron_minute,
+        minute  => $minute,
       }
     }
     # Run Puppet through external tooling, like MCollective
