@@ -50,8 +50,9 @@ describe 'puppet::agent', :type => :class do
             :puppet_run_style       => 'cron',
             :splay                  => 'true',
             :environment            => 'production',
-            :puppet_run_interval    => 30,
             :puppet_server_port     => 8140,
+            :cron_hour              => 5,
+            :cron_minute            => '*/30',
           }
         end
         it{
@@ -69,8 +70,9 @@ describe 'puppet::agent', :type => :class do
           )
           should contain_cron('puppet-client').with(
             :command  => '/usr/bin/puppet agent --no-daemonize --onetime --logdest syslog > /dev/null 2>&1',
-            :user  => 'root',
-            :hour => '*'
+            :user     => 'root',
+            :hour     => '5'
+            :minute   => '*/30'
           )
         }
       end
