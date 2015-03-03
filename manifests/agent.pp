@@ -81,7 +81,7 @@ class puppet::agent(
   $http_proxy_host        = undef,
   $http_proxy_port        = undef,
   $cron_hour              = '*',
-  $cron_minute            = undef, 
+  $cron_minute            = undef,
 ) inherits puppet::params {
 
   if ! defined(User[$::puppet::params::puppet_user]) {
