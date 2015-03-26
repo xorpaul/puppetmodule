@@ -41,7 +41,8 @@ class puppet::passenger(
   $puppet_ssldir,
   $certname,
   $conf_dir,
-  $dns_alt_names
+  $dns_alt_names,
+  $config_addon = ''
 ){
   include apache
   include puppet::params
