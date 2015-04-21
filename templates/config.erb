@@ -26,7 +26,7 @@ ARGV << "--rack"
 # to ~puppet/.puppet
 ARGV << "--confdir" << "/etc/puppet"
 ARGV << "--vardir"  << "/var/lib/puppet"
-
+<%= @config_addon %>
 # NOTE: it's unfortunate that we have to use the "CommandLine" class
 #  here to launch the app, but it contains some initialization logic
 #  (such as triggering the parsing of the config file) that is very
