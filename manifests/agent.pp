@@ -27,6 +27,8 @@
 #   ['templatedir']           - Template dir, if unset it will remove the setting.
 #   ['configtimeout']         - How long the client should wait for the configuration to be retrieved before considering it a failure
 #   ['stringify_facts']       - Wether puppet transforms structured facts in strings or no. Defaults to true in puppet < 4, deprecated in puppet >=4 (and will default to false)
+#   ['cron_hour']             - What hour to run if puppet_run_style is cron
+#   ['cron_minute']           - What minute to run if puppet_run_style is cron
 #
 # Actions:
 # - Install and configures the puppet agent
@@ -78,6 +80,8 @@ class puppet::agent(
   $certname               = undef,
   $http_proxy_host        = undef,
   $http_proxy_port        = undef,
+  $cron_hour              = '*',
+  $cron_minute            = undef,
 ) inherits puppet::params {
 
   if ! defined(User[$::puppet::params::puppet_user]) {
@@ -135,18 +139,21 @@ class puppet::agent(
       $service_ensure = 'stopped'
       $service_enable = false
 
-      # Run puppet as a cron - this saves memory and avoids the whole problem
-      # where puppet locks up for no reason. Also spreads out the run intervals
-      # more uniformly.
-      $time1  =  fqdn_rand($puppet_run_interval)
-      $time2  =  fqdn_rand($puppet_run_interval) + 30
+      # Default to every 30 minutes - random around the clock
+      if $cron_minute == undef {
+        $time1  =  fqdn_rand(30)
+        $time2  =  $time1 + 30
+        $minute = [ $time1, $time2 ]
+      }
+      else {
+        $minute = $cron_minute
+      }
 
       cron { 'puppet-client':
         command => $puppet_run_command,
         user    => 'root',
-        # run twice an hour, at a random minute in order not to collectively stress the puppetmaster
-        hour    => '*',
-        minute  => [ $time1, $time2 ],
+        hour    => $cron_hour,
+        minute  => $minute,
       }
     }
     # Run Puppet through external tooling, like MCollective
