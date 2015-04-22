@@ -1,10 +1,10 @@
 # A sample Gemfile
 source "https://rubygems.org"
 
-gem 'puppet'
+gem 'puppet', '< 4.0.0'
 
 gem 'rake'
-gem 'rspec', '< 3.0.0'
+gem 'rspec'
 gem 'puppet-lint'
 gem 'beaker'
 gem 'beaker-rspec'
