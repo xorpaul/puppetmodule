@@ -78,6 +78,64 @@ describe 'puppet::agent', :type => :class do
       end
     end
 
+    describe 'on Debian with splay and splaylimit' do
+      context 'with splaylimit but no splay set' do
+        let(:params) do
+          {
+            :puppet_server          => 'test.exaple.com',
+            :puppet_agent_service   => 'puppet',
+            :puppet_agent_package   => 'puppet',
+            :version                => '/etc/puppet/manifests/site.pp',
+            :puppet_run_style       => 'cron',
+            :splay                  => false,
+            :splaylimit             => '300s',
+            :environment            => 'production',
+            :puppet_run_interval    => 30,
+            :puppet_server_port     => 8140,
+            :use_srv_records        => true,
+          }
+        end
+
+        it {
+          should compile.and_raise_error(/puppet has attribute splaylimit set but has splay unset/)
+        }
+      end
+      context 'on Debian with splaylimit and splay set' do
+        let(:params) do
+          {
+            :puppet_server          => 'test.exaple.com',
+            :puppet_agent_service   => 'puppet',
+            :puppet_agent_package   => 'puppet',
+            :version                => '/etc/puppet/manifests/site.pp',
+            :puppet_run_style       => 'cron',
+            :splay                  => 'true',
+            :splaylimit             => '300s',
+            :environment            => 'production',
+            :puppet_run_interval    => 30,
+            :puppet_server_port     => 8140,
+            :srv_domain             => 'example.com',
+          }
+        end
+
+        it{
+          should contain_ini_setting('puppetagentsplay').with(
+            :ensure  => 'present',
+            :section => 'agent',
+            :setting => 'splay',
+            :path    => '/etc/puppet/puppet.conf',
+            :value   => 'true'
+          )
+          should contain_ini_setting('puppetagentsplaylimit').with(
+            :ensure  => 'present',
+            :section => 'agent',
+            :setting => 'splaylimit',
+            :path    => '/etc/puppet/puppet.conf',
+            :value   => '300s'
+          )
+        }
+      end
+    end
+
     describe 'srv records on Debian' do
       context 'fail on Debian with use_srv_records but no srv_domain set' do
         let(:params) do

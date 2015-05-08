@@ -14,6 +14,7 @@
 #   ['user_id']               - The userid of the puppet user
 #   ['group_id']              - The groupid of the puppet group
 #   ['splay']                 - If splay should be enable defaults to false
+#   ['splaylimit']            - The maximum time to delay before runs. Defaults to undef.
 #   ['environment']           - The environment of the puppet agent
 #   ['report']                - Whether to return reports
 #   ['pluginsync']            - Whethere to have pluginsync
@@ -66,6 +67,7 @@ class puppet::agent(
   $use_srv_records        = false,
   $puppet_run_interval    = 30,
   $splay                  = false,
+  $splaylimit             = undef,
   $puppet_server_port     = $::puppet::params::puppet_server_port,
   $report                 = true,
   $pluginsync             = true,
@@ -273,6 +275,19 @@ class puppet::agent(
     ensure  => present,
     setting => 'runinterval',
     value   => $runinterval,
+  }
+
+  if (($splaylimit != undef) and ($splay != true))
+  {
+    fail("${module_name} has attribute splaylimit set but has splay unset")
+  }
+  elsif (($splaylimit != undef) and ($splay == true))
+  {
+    ini_setting {'puppetagentsplaylimit':
+      ensure  => present,
+      setting => 'splaylimit',
+      value   => $splaylimit,
+    }
   }
 
   ini_setting {'puppetagentsplay':
